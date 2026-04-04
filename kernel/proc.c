@@ -141,6 +141,8 @@ found:
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
 
+  memset(&p->mask,sizeof(p->mask),0);
+
   return p;
 }
 
@@ -314,6 +316,8 @@ fork(void)
   acquire(&np->lock);
   np->state = RUNNABLE;
   release(&np->lock);
+
+  np->mask = p->mask;
 
   return pid;
 }
