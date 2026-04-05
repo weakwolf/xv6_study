@@ -6,6 +6,7 @@
 #include "memlayout.h"
 #include "spinlock.h"
 #include "proc.h"
+#include "sysinfo.h"
 
 uint64
 sys_exit(void)
@@ -81,6 +82,24 @@ sys_trace(void)
     return -1;
 
   myproc()->mask |= n;
+  return 0;
+}
+
+uint64
+sys_sysinfo(void)
+{
+  uint64 user_data; // 指向用户空间struct sysinfo的指针
+  if(argaddr(0,&user_data) < 0)
+    return -1;
+
+  struct sysinfo info;
+  struct proc* p = myproc();
+  info.freemem = free_mem_size();
+  info.nproc = get_process_count();
+
+  if(copyout(p->pagetable,user_data,(char*)&info,sizeof(info)) < 0)
+    return -1;
+
   return 0;
 }
 
