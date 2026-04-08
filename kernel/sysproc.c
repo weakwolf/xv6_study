@@ -75,7 +75,6 @@ sys_sleep(void)
   return 0;
 }
 
-
 #ifdef LAB_PGTBL
 int
 sys_pgaccess(void)
