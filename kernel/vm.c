@@ -432,3 +432,46 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
     return -1;
   }
 }
+
+void vmprint(pagetable_t pgtbl)
+{
+  // pagetable physical address
+  printf("page table %p\n",pgtbl);
+
+  /**
+   * 这里面一定要注意pte本身的值是一个8字节整数，
+   * 但是它本身的意义其实是指针，所以必须转换为uint64*使用
+   * 也就是让编译器把它看做指针而不是整数
+   */
+  // 第一层
+  for(uint64* start = pgtbl, i = 0; i < 512; ++i)
+  {
+    uint64 pte = start[i];
+    if(pte & PTE_V)
+    {
+      uint64 pa = PTE2PA(pte);
+      printf("..%d: pte %p pa %p\n",i,pte,(void*)pa);
+      // 第二层
+      for(uint64* start1 = (uint64*)pa, j = 0; j < 512; ++j)
+      {
+        // 读取逻辑和第一层一样
+        uint64 pte = start1[j];
+        if(pte & PTE_V)
+        {
+          uint64 pa = PTE2PA(pte);
+          printf(".. ..%d: pte %p pa %p\n",j,pte,(void*)pa);
+          // 第三层
+          for(uint64* start2 = (uint64*)pa, k = 0; k < 512; ++k)
+          {
+            uint64 pte = start2[k];
+            if(pte & PTE_V)
+            {
+              uint64 pa = PTE2PA(pte);
+              printf(".. .. ..%d: pte %p pa %p\n",k,pte,(void*)pa);
+            }
+          }
+        }
+      }
+    }
+  }
+}
